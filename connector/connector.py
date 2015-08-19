@@ -35,6 +35,9 @@ class Connector:
 		"""
 		if tag_name is None:
 			raise ValueError("tag_name is None!")
+
+		if tag_name[0] == "#":
+			tag_name = tag_name[1:]
 		
 		base_url = "https://api.instagram.com/v1/tags/"+tag_name+"/media/recent?access_token="+ACCESS_TOKEN
 		if start_date is None:
@@ -84,8 +87,7 @@ class Connector:
 				url = json_data["pagination"].get("next_url",None)
 				response = urllib2.urlopen(url)
 				json_data = json.loads(response.read().decode('utf-8'))
-				print (url)
-				#result.extend(json_data["data"])
+				result.extend(json_data["data"])
 			else:
 				url = None
 		
@@ -95,7 +97,6 @@ class Connector:
 	def process_task(self,tag_name,start_date,end_date):
 		raw_data = self.callApi(tag_name,start_date,end_date)
 		data = self.parse_data(raw_data)
-		import pdb;pdb.set_trace()
 		return data
 		
 		
@@ -105,5 +106,5 @@ class Connector:
 
 if __name__ == "__main__":
 	connector = Connector()
-	connector.process_task('hirasidmakeup','2015-8-19','2015-8-19')
-	#sys.exit(0)
+	connector.process_task('#stanza','2015-8-19','2015-8-19')
+

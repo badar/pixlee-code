@@ -16,7 +16,7 @@ class Picture(models.Model):
 
 
 class Task(models.Model):
-	""" status : [COMPLETED,PROCESSING,NEW]
+	""" Each task has tag_name, start_date and end_date.
 	"""
 	tag_name = models.CharField(max_length=200,blank=True)
 	start_date = models.DateTimeField(default=timezone.now)

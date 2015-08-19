@@ -26,9 +26,18 @@ class Connector:
 
 	def get_unix_timestamp_given_datetime(self,date):
 		""" given a string, convert to unix timestamp.
-			date format: datetime object
+			date format: datetime object.
 		"""
 		return mktime(date.timetuple())
+
+	def sanitize_end_date(self,date):
+		""" given a date, if ot's greater than now, default to now.
+		"""
+		date = datetime.strptime(date, "%Y-%m-%d").timetuple()
+		now = datetime.now()
+		if date > now:
+			date = now
+		return date
 
 	def construct_url(self,tag_name,start_date,end_date):
 		""" given a tagname and start_date and end_date construct a url.
@@ -47,7 +56,8 @@ class Connector:
 		if end_date is None:
 			end_date = self.get_unix_timestamp_given_datetime(datetime.now())
 		else:
-			end_date = self.get_unix_timestamp_given_string(end_date)
+			end_date = sanitize_end_date(end_date)
+			end_date = self.get_unix_timestamp_given_datetime(end_date)
 
 		url = base_url + "&min_timestamp="+ str(start_date) + "&max_timestamp="+str(end_date)
 		return url
@@ -90,11 +100,12 @@ class Connector:
 				result.extend(json_data["data"])
 			else:
 				url = None
-		
 		return result
 
 
 	def process_task(self,tag_name,start_date,end_date):
+		""" called by celery to run each request asynchronouly.
+		"""
 		raw_data = self.callApi(tag_name,start_date,end_date)
 		data = self.parse_data(raw_data)
 		return data
@@ -106,5 +117,5 @@ class Connector:
 
 if __name__ == "__main__":
 	connector = Connector()
-	connector.process_task('#stanza','2015-8-19','2015-8-19')
+	connector.process_task('#pixlee','2015-8-19','2015-8-19')
 

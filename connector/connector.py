@@ -2,11 +2,10 @@ import re
 import sys
 import json
 import datetime
-from urllib.request import Request, urlopen
-import urllib.request as urllib2
 from datetime import datetime
 from time import mktime
-
+import requests
+import logging
 
 CLIENT_SECRET = "381f55a0c1fd421aa8fe49bcf8f1daa8"
 ACCESS_TOKEN = "503340310.f116fce.069c8ad42d1c49f1a2476333bd9432b4"
@@ -30,14 +29,16 @@ class Connector:
 		"""
 		return mktime(date.timetuple())
 
-	def sanitize_end_date(self,date):
-		""" given a date, if ot's greater than now, default to now.
+	def get_datetime_from_unix(self,date):
+		""" given unixtimestamp get datetime object.
 		"""
-		date = datetime.strptime(date, "%Y-%m-%d").timetuple()
-		now = datetime.now()
-		if date > now:
-			date = now
-		return date
+		return datetime.fromtimestamp(int(date))
+
+	def get_string_date_from_datetime(self,date):
+		""" given datetime convert to string date
+		"""
+		return date.strftime('%Y-%M-%D')
+
 
 	def construct_url(self,tag_name,start_date,end_date):
 		""" given a tagname and start_date and end_date construct a url.
@@ -52,15 +53,13 @@ class Connector:
 		if start_date is None:
 			start_date = self.get_unix_timestamp_given_string(START_DATE)
 		else:
-			start_date = self.get_unix_timestamp_given_string(start_date)
+			start_date = self.get_unix_timestamp_given_datetime(start_date)
 		if end_date is None:
 			end_date = self.get_unix_timestamp_given_datetime(datetime.now())
 		else:
-			end_date = sanitize_end_date(end_date)
 			end_date = self.get_unix_timestamp_given_datetime(end_date)
 
-		url = base_url + "&min_timestamp="+ str(start_date) + "&max_timestamp="+str(end_date)
-		return url
+		return (base_url,start_date,end_date)
 
 
 	def parse_data(self,raw_data):
@@ -71,7 +70,7 @@ class Connector:
 		for val in raw_data:
 			if val is not None:
 				entry = {}
-				entry["date"] = val.get("created_time",None)
+				entry["date"] = self.get_datetime_from_unix(val.get("created_time",None))
 				entry["id"] = val.get("id",None)
 				entry["link"] = val.get("link",None)
 				data.append(entry)
@@ -85,30 +84,49 @@ class Connector:
 		client_secret = CLIENT_SECRET
 		
 		result = []
-		url = self.construct_url(tag_name,start_date,end_date)
-		
-		req = Request(url)
-		response = urllib2.urlopen(req)
-		json_data = json.loads(response.read().decode('utf-8'))
-		result.extend(json_data["data"])
-		
+		url,start_date,end_date = self.construct_url(tag_name,start_date,end_date)
+		start_date = self.get_datetime_from_unix(start_date)
+		end_date = self.get_datetime_from_unix(end_date)
+		r = requests.get(url)
+		json_data = r.json()
+		data = json_data["data"]
+		for val in data:
+			created_date = self.get_datetime_from_unix(val.get("created_time"))
+			if created_date >= start_date and created_date <= end_date:
+				result.append(val)
+
 		while url is not None:
 			if "next_url" in json_data["pagination"]:
 				url = json_data["pagination"].get("next_url",None)
-				response = urllib2.urlopen(url)
-				json_data = json.loads(response.read().decode('utf-8'))
-				result.extend(json_data["data"])
+				r = requests.get(url)
+				json_data = r.json()
+				data = json_data["data"]
+
+				for val in data:
+					created_date = self.get_datetime_from_unix(val.get("created_time"))
+					if created_date >= start_date and created_date <= end_date:
+						result.append(val)
 			else:
 				url = None
 		return result
 
 
-	def process_task(self,tag_name,start_date,end_date):
+	def process_task(self,task):
 		""" called by celery to run each request asynchronouly.
 		"""
+		startTime = datetime.now()
+		tag_name = task.tag_name
+		start_date = task.start_date
+		end_date = task.end_date
+		_id = task.id
+		logging.info("processing task with id:%s, tag_name:%s",_id,tag_name)
+
 		raw_data = self.callApi(tag_name,start_date,end_date)
 		data = self.parse_data(raw_data)
-		return data
+		endTime = datetime.now()
+		timedelta = endTime - startTime
+		return data,task
+		
 		
 		
 		
@@ -117,5 +135,5 @@ class Connector:
 
 if __name__ == "__main__":
 	connector = Connector()
-	connector.process_task('#pixlee','2015-8-19','2015-8-19')
+	connector.process_task('#pixlee','2015-8-01','2015-8-19')
 

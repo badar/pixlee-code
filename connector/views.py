@@ -22,7 +22,6 @@ def post_task(request):
         end_date = request._post.get("end_date")
         call_connector_task.delay(tag_name,start_date,end_date)
        
-
     return render(request, 'connector/post_task.html', {'form': form})
 
 

@@ -43,7 +43,6 @@ class Connector:
 		"""
 		if tag_name is None:
 			raise ValueError("tag_name is None!")
-
 		if tag_name[0] == "#":
 			tag_name = tag_name[1:]
 

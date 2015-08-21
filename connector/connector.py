@@ -17,14 +17,14 @@ class Connector:
 	"""
 	def get_unix_timestamp_given_string(self,date):
 		""" given a string, convert to unix timestamp.
-			date format: Y-M-D.
+		    date format: Y-M-D.
 		"""
 		date = date.split(" ")[0]
 		return mktime(datetime.strptime(date, "%Y-%m-%d").timetuple())
 
 	def get_unix_timestamp_given_datetime(self,date):
 		""" given a string, convert to unix timestamp.
-			date format: datetime object.
+		    date format: datetime object.
 		"""
 		return mktime(date.timetuple())
 
@@ -60,8 +60,7 @@ class Connector:
 		return (base_url,start_date,end_date)
 
 	def parse_data(self,raw_data):
-		""" given raw data, parse to extract following values
-			to store in db. 
+		""" given raw data, parse to extract following values to store in db. 
 		"""
 		data = []
 		for val in raw_data:
@@ -74,12 +73,10 @@ class Connector:
 		return data
 
 	def call_api(self,tag_name,start_date,end_date):
-		""" given start and end date and tagname - make 
-			api call to instagram and return raw data.
+		""" given start and end date and tagname - make api call to instagram and return raw data.
 		"""
 		access_token = ACCESS_TOKEN 
 		client_secret = CLIENT_SECRET
-		
 		result = []
 		url,start_date,end_date = self.construct_url(tag_name,start_date,end_date)
 		start_date = self.get_datetime_from_unix(start_date)
@@ -101,7 +98,6 @@ class Connector:
 			except Exception as e:
 				logger.error("Request Error %r: %s" % (url, e))
 				raise
-
 		return result
 
 	def process_task(self,task):
@@ -119,7 +115,6 @@ class Connector:
 		timedelta = endTime - startTime
 		return data
 			
-if __name__ == "__main__":
-	connector = Connector()
+
 
 

@@ -7,13 +7,13 @@ http://localhost:8000/task/new/
 Add #tagname, start_date and end_date
 
 Dependency:
-Django, Postgres, Python 3.0, Celery, Redis.
+Django, Postgres, Python3.0, Celery, Redis.
 
 System Analysis:
 
 1- The system runs a Django app called "connector". I installed celery with reddis as message broker to run all requests 
 asynchrounously. Celery runs all tasks in parallel and we can always set it to run multiple workers instead of one worker.
-connector.py makes api calls to Instagram. A request by user is a task that is stored in postgres db. A task can be in 3 states that are "NEW","PROCESSING" and "DONE". 
+Tasks are created by each request to the server. Tasks consist of tagname , start and enddate. Each task has uniqe id and is stored in postgresDB. This is independent of how redis stores celery tasks.
 
 How to minimize the amount of API hits, and thus minimize the chance of hitting the rate limit on the token?
 TODO?

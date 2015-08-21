@@ -13,7 +13,8 @@ System Analysis:
 
 1- The system runs a Django app called "connector". I installed celery with reddis as message broker to run all requests 
 asynchrounously. Celery runs all tasks in parallel and we can always set it to run multiple workers instead of one worker.
-Tasks are created by each request to the server. Tasks consist of tagname , start and enddate. Each task has uniqe id and is stored in postgresDB. This is independent of how redis stores celery tasks.
+Tasks are created by each request to the server. Tasks consist of tagname , start_date and end_date. Each task has uniqe id and is stored in postgresDB. This is independent of how redis stores celery tasks.
+A task can exist in 3 states namely: NEW, PROCESSING and DONE. 
 
 How to minimize the amount of API hits, and thus minimize the chance of hitting the rate limit on the token?
 TODO?

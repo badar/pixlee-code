@@ -13,12 +13,14 @@ System Analysis:
 
 1- The system runs a Django app called "connector". I installed celery with reddis as message broker to run all requests 
 asynchrounously. Celery runs all tasks in parallel and we can always set it to run multiple workers instead of one worker.
-if the Date is in future, the end date defaults to datetime.now().
+connector.py makes api calls to Instagram. A request by user is a task that is stored in postgres db. A task can be in 3 states that are "NEW","PROCESSING" and "DONE". 
+
 How to minimize the amount of API hits, and thus minimize the chance of hitting the rate limit on the token?
 TODO?
 If the system dies, how do you recover from the last point the collection occurred?
 TODO?
-
+If the Date is in future:
+TODO:
 
 Analysis of Connector:
 

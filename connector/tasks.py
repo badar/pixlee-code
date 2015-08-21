@@ -26,7 +26,7 @@ def call_connector_task(task_id):
 	try:
 		data = connector.process_task(task)
 	except Exception as e:
-		call_connector_task.retry(args=(task_id),countdown=60,exec=e,max_retries=2)
+		return call_connector_task.retry(args=(task_id),countdown=60,exec=e,max_retries=2)
 
 	for pic in data:
 		p = Picture(link=pic["link"],pic_id=pic["id"],created_date=pic["date"],task=task)

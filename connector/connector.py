@@ -84,16 +84,9 @@ class Connector:
 		url,start_date,end_date = self.construct_url(tag_name,start_date,end_date)
 		start_date = self.get_datetime_from_unix(start_date)
 		end_date = self.get_datetime_from_unix(end_date)
-		r = requests.get(url)
-		json_data = r.json()
-		data = json_data["data"]
-		for val in data:
-			created_date = self.get_datetime_from_unix(val.get("created_time"))
-			if created_date >= start_date and created_date <= end_date:
-				result.append(val)
+
 		while url is not None:
-			if "next_url" in json_data["pagination"]:
-				url = json_data["pagination"].get("next_url",None)
+			try:
 				r = requests.get(url)
 				json_data = r.json()
 				data = json_data["data"]
@@ -101,8 +94,14 @@ class Connector:
 					created_date = self.get_datetime_from_unix(val.get("created_time"))
 					if created_date >= start_date and created_date <= end_date:
 						result.append(val)
-			else:
-				url = None
+				if "next_url" in json_data["pagination"]:
+					url = json_data["pagination"].get("next_url",None)
+				else:
+					url = None
+			except Exception as e:
+				logger.error("Request Error %r: %s" % (url, e))
+				raise
+
 		return result
 
 	def process_task(self,task):

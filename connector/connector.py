@@ -119,8 +119,7 @@ class Connector:
 		start_date = task.start_date
 		end_date = task.end_date
 		_id = task.id
-		logging.info("processing task with id:%s, tag_name:%s",_id,tag_name)
-
+		logging.info("processing task with id:%s, tag_name:%s, start_date:%s and end_date:%s",_id,tag_name,start_date,end_date)
 		raw_data = self.callApi(tag_name,start_date,end_date)
 		data = self.parse_data(raw_data)
 		endTime = datetime.now()

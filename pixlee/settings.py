@@ -104,6 +104,7 @@ CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
+CELERY_ACKS_LATE = True
 
 
 # Static files (CSS, JavaScript, Images)

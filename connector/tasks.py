@@ -7,23 +7,30 @@ from .models import Task
 logger = get_task_logger(__name__)
 
 
-@task
-def call_connector_task(tag_name,start_date,end_date):
+@task(rate_limit='100/h')
+def call_connector_task(task_id):
 	""" call connector with args.
 	"""
 	connector = Connector()
-	logger.info("call connector with tag_name: %s,start_date: %s,end_date: %s",tag_name,start_date,end_date)
+	logger.info("call connector with task_id: %s",task_id)
 	
-
-	tasks = Task.objects.filter(status="NEW")
-
-	for tsk in tasks:
-		tsk.status = "PROCESSING"
-		tsk.save()
-		data,task = connector.process_task(tsk)
-		for pic in data:
-			p = Picture()
-			p.save_picture(pic)
-
-		task.status = "DONE"
+	task = Task.objects.get(id = task_id)
+	if task.status == "DONE":
+		return
+	if task.status == "PROCESSING":
+		Picture.objects.get(task).delete()
+	else:
+		task.status = "PROCESSING"
 		task.save()
+
+	try:
+		data = connector.process_task(task)
+	except Exception as e:
+		self.retry(countdown=1000,exec=e,max_retries=2)
+
+	for pic in data:
+		p = Picture(link=pic["link"],pic_id=pic["id"],created_date=pic["date"],task=task)
+		p.save()
+
+	task.status = "DONE"
+	task.save()

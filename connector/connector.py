@@ -125,7 +125,7 @@ class Connector:
 		data = self.parse_data(raw_data)
 		endTime = datetime.now()
 		timedelta = endTime - startTime
-		return data,task
+		return data
 		
 		
 		
@@ -135,5 +135,5 @@ class Connector:
 
 if __name__ == "__main__":
 	connector = Connector()
-	connector.process_task('#pixlee','2015-8-01','2015-8-19')
+	#connector.process_task('#pixlee','2015-8-01','2015-8-19')
 

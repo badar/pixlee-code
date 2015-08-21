@@ -11,7 +11,6 @@ def tasks(request):
 	return render(request, 'connector/tasks.html', {})
 
 def post_task(request):
-    
     form = TaskForm()
     if request.method == "POST":
         form = TaskForm(request.POST)
@@ -20,8 +19,7 @@ def post_task(request):
         tag_name = request._post.get("tag_name")
         start_date = request._post.get("start_date")
         end_date = request._post.get("end_date")
-        call_connector_task.delay(task.id)
-       
+        call_connector_task.delay(task.id)  
     return render(request, 'connector/post_task.html', {'form': form})
 
 

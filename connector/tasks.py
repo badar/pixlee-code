@@ -7,7 +7,6 @@ from .models import Task
 from .models import States
 logger = get_task_logger(__name__)
 
-
 @task(acks_late=True,rate_limit="1000/h")
 def call_connector_task(task_id):
 	""" call connector with args.
@@ -27,7 +26,6 @@ def call_connector_task(task_id):
 		data = connector.process_task(task)
 	except Exception as e:
 		return call_connector_task.retry(args=(task_id),countdown=60,exec=e,max_retries=2)
-
 	for pic in data:
 		p = Picture(link=pic["link"],pic_id=pic["id"],created_date=pic["date"],task=task)
 		p.save()
